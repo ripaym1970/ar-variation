@@ -13,6 +13,7 @@ use yii\base\Model;
 use yii\base\NotSupportedException;
 use yii\base\UnknownPropertyException;
 use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * VariationBehavior provides support for ActiveRecord variation via related models.
@@ -265,12 +266,11 @@ class VariationBehavior extends Behavior
         if (is_array($this->_variationModels)) {
             return $this->_variationModels;
         }
-
         $variationModels = $this->owner->{$this->variationsRelation};
-
         $variationModels = $this->adjustVariationModels($variationModels);
-        $this->_variationModels = $variationModels;
-        return $variationModels;
+        $this->_variationModels = ArrayHelper::index($variationModels, 'language_id');
+
+        return $this->_variationModels;
     }
 
     /**
@@ -309,7 +309,7 @@ class VariationBehavior extends Behavior
         $variationsRelation = $this->owner->getRelation($this->variationsRelation);
 
         $optionReferenceAttribute = $this->variationOptionReferenceAttribute;
-        list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
+        [$ownerReferenceAttribute] = array_keys($variationsRelation->link);
 
         /* @var $variationModels BaseActiveRecord[] */
         /* @var $confirmedInitialVariationModels BaseActiveRecord[] */
@@ -630,7 +630,7 @@ class VariationBehavior extends Behavior
         }
 
         $variationsRelation = $this->owner->getRelation($this->variationsRelation);
-        list($ownerReferenceAttribute) = array_keys($variationsRelation->link);
+        [$ownerReferenceAttribute] = array_keys($variationsRelation->link);
 
         foreach ($variationModels as $variationModel) {
             $variationModel->{$ownerReferenceAttribute} = $this->owner->getPrimaryKey();
